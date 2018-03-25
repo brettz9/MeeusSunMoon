@@ -11,8 +11,12 @@
     "eslint": "eslint .",
     "rollup": "rollup -c",
     "node-qunit": "./node_modules/node-qunit/bin/cli.js --timeout 10000 -c dist/meeussunmoon.js -t test/tests-compiled.js -d moment:node_modules/moment/moment.js node_modules/moment-timezone/builds/moment-timezone-with-data.min.js",
+    "browser-qunit": "qunit-puppeteer http://localhost:3000/test",
     "node-test": "npm run eslint && npm run rollup && npm run node-qunit",
-    "test": "npm run node-test"
+    "browser-start": "npm run eslint && npm run rollup && opn http://localhost:3000/test && npm run start",
+    "browser-test": "npm run eslint && npm run rollup && npm run browser-qunit",
+    "test": "npm run node-test",
+    "start": "static -p 3000"
   },
   "dependencies": {
     "moment": "^2.21.0",

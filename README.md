@@ -193,3 +193,155 @@ MeeusSunMoon is freely distributable under the terms of the
 
 [license-image]: http://img.shields.io/badge/license-MIT-blue.svg
 [license-url]: LICENSE
+=======
+# MeeusSunMoon
+
+[![MIT License][license-image]][license-url]
+
+A JavaScript module for accurately calculating times of sunrise, solar noon,
+sunsets, and moon phases.
+
+Based on "Astronomical Algorithms" by Jean Meeus.
+
+## Dependencies
+
+MeeusSunMoon requires [Moment.js](http://momentjs.com/) and [Moment Timezone](http://momentjs.com/timezone/)
+
+## Documentation
+
+### Configuration
+
+There are two configuration options which can be set as
+
+```js
+MeeusSunMoon.roundToNearestMinute = true; // Defaults to false
+MeeusSunMoon.returnTimeForPNMS = true; // Defaults to false
+```
+
+`roundToNearestMinute` rounds the reported time, up if seconds are 30+, down
+if less.
+
+`returnTimeForPNMS` handles the behaviour when no sunrise or sunset time
+can be returned because the specified region would be experiencing polar night
+or midnight sun on the date. If set to `false`, a string is returned, either
+`"PN"` or `"MS"`. If set to `true`, the return time will be 6:00 local
+standard time (i.e. 7:00 local time if DST is in effect) for sunrise and
+18:00 local standard time for sunset. Additionally, the moment.tz object
+that is returned will be tagged inside its `creationData` property, with
+`"--"` for polar night and `"**"` for midnight sun. This way, the fact
+that this is not an actual sunrise/sunset time can be retrieved later,
+e.g. with moment-custom-info (see below).
+
+### Usage
+
+#### Sunrise & Sunset
+
+```js
+MeeusSunMoon.sunrise(datetime, latitude, longitude);
+MeeusSunMoon.sunset(datetime, latitude, longitude);
+```
+
+Returns the sunrise or sunset for the given date and location as
+a moment.tz object.
+
+`datetime` is a moment.tz object designating the day for which the
+sunrise/set time should be calculated. The object should either contain a
+definite timezone, or be in UTC, just a UTC offset will lead to unexpected
+behaviour.
+
+`latitude` is the geographic latitude in degrees (-90 to 90, North is
+positive, South negative).
+
+`longitude` is the geographic longitude in degrees (-180 to 180, East is
+positive, West negative).
+
+If there is no sunrise or sunset event on the given day, a string or a tagged
+time will be returned (see above).
+
+#### Solar Noon
+
+```js
+MeusSunMoon.solarNoon(datetime, longitude);
+```
+
+Returns the solar noon for the given date and location as a moment.tz
+object. Inputs as above.
+
+#### Moon Phases
+
+```js
+MeeusSunMoon.yearMoonPhases(year, phase, timezone);
+```
+
+Returns an array of the date-times as moment.tz objects for all moons of
+the given phase in the year.
+
+`year` The Gregorian year for which the phases should be returned.
+Note: setting e.g. `96` as the year will NOT return phases for the year 1996
+but the year 96.
+
+`phase` Phase of the moon as an integer. `0` for new moon, `1` for first
+quarter, `2` for full moon, `3` for last quarter.
+
+`timezone` Optional. IANA timezone string, e.g. `"Europe/London"`. If
+not specified, times are returned as UTC.
+
+#### moment-custom-info
+
+moment-custom-info is a very small plugin for moment.js which
+(arguably mis-) uses the `creationData` property of a moment object
+to store custom meta-information, e.g. in the context of MeeusSunMoon to
+indicate that a given time is a fallback due to no sunrise or sunset occurring
+on the given day. It makes use of the fact that the parser for the
+`String + Format` constructor of moment.js ignores non-alphanumeric
+characters. Thus, a key of special symbols can be stored in the `creationData`
+by constructing a date like this:
+
+```js
+moment('**12-25-1995', 'MM-DD-YYYY');
+```
+
+moment-custom-info provides a wrapper for `moment.format()` called
+`moment.formatCI()`, which in addition to the standard format string takes an
+array of key-value pairs to associate a 2-character token used in the object's
+creation with a string to be placed behind the standard output of
+`moment.format()`.
+
+**Example:**
+```js
+const dateFormatKeys = {'**': '‡', '--': '†'};
+const myMoment = moment('**12-25-1995 06:00', 'MM-DD-YYYY HH:mm');
+console.log(myMoment.formatCI('HH:mm', dateFormatKeys));
+// returns `06:00‡`
+```
+
+## Accuracy
+
+The algorithms themselves use many higher-order corrections in order to
+achieve a high degree of accuracy. To ensure a correct implementation,
+I have compared over 17,000 times across 16 locations spanning extremes of
+latitude and longitude to outside sources such as the US Naval Observatory
+and found that 97% agreed to the minute, with the rest deviating by at
+most one minute. The only exception to this are locations experiencing polar
+night or midnight sun (i.e. within the polar circles) for which - for the
+days immediately preceding and following periods of polar night or midnight
+sun - the discrepancy can be larger.
+
+`test/tests.html` can be run to verify this. When `maxError` (maximum
+deviation in minutes for the test to pass) in `test/tests.js` is set to 0,
+about 3% of the tests will fail. When set to 1, all will pass. (For the
+test locations in northern and southern extremes, a few dates just before
+and just after periods of polar night or midnight sun aren't tested, as the
+accuracy is known to suffer there.)
+
+## CHANGES
+
+See [CHANGES](./CHANGES).
+
+## License
+
+MeeusSunMoon is freely distributable under the terms of the
+[MIT license](LICENSE).
+
+[license-image]: http://img.shields.io/badge/license-MIT-blue.svg
+[license-url]: LICENSE
