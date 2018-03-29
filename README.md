@@ -205,7 +205,27 @@ Based on "Astronomical Algorithms" by Jean Meeus.
 
 ## Dependencies
 
-MeeusSunMoon requires [Moment.js](http://momentjs.com/) and [Moment Timezone](http://momentjs.com/timezone/)
+MeeusSunMoon requires [Moment.js](http://momentjs.com/) and [Moment Timezone](http://momentjs.com/timezone/).
+
+## Installation
+
+ES6 Modules (with Rollup)
+
+```js
+import MeusSunMoon from 'meeussunmoon';
+```
+
+ES6 Modules (direct use in browser without a bundler):
+
+```js
+import MeusSunMoon from 'node_modules/meeussunmoon/dist/meeussunmoon-es.js';
+```
+
+Older browsers:
+
+```html
+<script src="node_modules/meeussunmoon/dist/meeussunmoon.min.js"></script>
+```
 
 ## Documentation
 
